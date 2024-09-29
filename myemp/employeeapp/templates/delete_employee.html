@@ -1,0 +1,23 @@
+{% extends "basetemplate.html" %}
+{% load static %}
+
+{% block title %}
+Delete Employee
+{% endblock %}
+
+{% block content %}
+<h2 class="text-center">Delete Employee</h2>
+
+<!-- Display a confirmation message -->
+<div class="alert alert-warning">
+    <p>Are you sure you want to delete the employee <strong>{{ employee.fname }} {{ employee.lname }}</strong>?</p>
+    <p>Deleting this employee will permanently remove all their information from the database.</p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="{% url 'index' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User and Employee List</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        body {
+            background-color: #f8f9fa;  /* White or light background */
+        }
+
+        /* Navbar styling */
+        .navbar {
+            background-color: #e0e0e0 !important;  /* Subtle gray background */
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Box shadow for depth */
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #343a40; /* Darker gray for the brand */
+        }
+
+        .navbar .nav-link {
+            color: #6c757d; /* Light gray text */
+        }
+
+        .navbar .nav-link:hover {
+            color: #343a40; /* Darker color on hover */
+        }
+
+        .navbar p {
+            margin: 0;
+            padding: 0;
+            color: #007bff; /* Blue text for the username */
+            display: inline-block;
+        }
+
+        /* Ensure content starts below the navbar */
+        .main-content {
+            padding-top: flex; /* Adjust this value if the navbar height changes */
+        }
+
+        /* Add spacing between the rows to avoid overlap */
+        .row {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Gallery App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user_employee_list' %}">Employee List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employee' %}">Add Employee</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                    </li>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                        <p class="text-bg-primary my-3">Hello, {{ user.username }}</p>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content with padding to avoid overlap with navbar -->
+    <div class="container main-content">  
+        <h2 class="text-center">รายชื่อพนักงาน</h2>
+        <div class="row justify-content-center">  
+            {% for emp in all_employee %}
+            <div class="col-lg-2 col-md-3 col-sm-6 col-12 my-3"> 
+                <div class="card" style="width: 100%"> 
+                    {% if emp.picture and emp.picture.name %}
+                        <img src="{{ emp.picture.url }}" class="card-img-top" alt="Employee Image">
+                    {% else %}
+                        <img src="{% static 'images/default_image.jpg' %}" class="card-img-top" alt="Default Image">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{emp.fname}} {{emp.lname}}</h5>
+                        <p class="card-text">ที่อยู่: {{emp.address}}</p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            เพศ: {{emp.gender}}<br/>
+                            วันเกิด: {{emp.birthdate|date:"j F Y"}}  
+                        </li>
+                        <li class="list-group-item">แผนก: {{emp.department}}</li>
+                        <li class="list-group-item">เงินเดือน: {{emp.salary}} บาท</li>
+                    </ul>
+                    <div class="card-body">
+                        {% if user.is_superuser %}
+                        <a href="{% url 'edit' emp.id emp.id %}">
+                            <img src="{% static 'images/edit_icon.png' %}" alt="แก้ไข" style="width: 30px; height: 30px"/> 
+                        </a>
+                        <a href="{% url 'delete' emp.id%}"
+                        onclick="return confirm('ต้องการลบ {{ emp.fname }} หรือไม่?')">
+                            <img src="{% static 'images/delete_icon.png' %}" alt="ลบ" style="width: 30px; height: 30px;">
+                        </a>
+                        {% endif %}
+                        <!-- Order button for normal users -->
+                        <a href="{% url 'order' emp.id %}" class="btn btn-primary">Order</a>
+                    </div>
+                </div>
+                {% if emp.created_by %}  <!-- Check if created_by is not null -->
+                    <p class="card-text" style="opacity: 0.3; font-size: 12px;">Added by: {{ emp.created_by.username }}</p>  <!-- Display the user who added the employee -->
+                {% else %}
+                    <p class="card-text" style="opacity: 0.3; font-size: 12px;">Added by: Unknown</p>  <!-- Fallback if created_by is null -->
+                {% endif %}
+            </div> 
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}" async defer></script>
+</body>
+</html>
